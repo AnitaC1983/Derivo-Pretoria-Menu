@@ -3,7 +3,7 @@
 // ============================================================
 
 // Set this to the Monday of your first "Week 1" rotation
-const ROTATION_START_DATE = new Date(2026, 3, 20); // Monday 20 April 2026 = Week 1
+const ROTATION_START_DATE = new Date(2026, 3, 13); // Monday 13 April 2026 = Week 1
 
 // Each day has 3 options. Each option has:
 //   dish  — the main meal name
