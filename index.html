@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="refresh" content="600" />
+  <title>Daily Menu</title>
+  <script src="menu-data.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d1728;
+      color: #eaeaea;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Derivco logo bar (top, centred) ── */
+    .logo-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 48px;
+      background: #ffffff;
+    }
+
+    .logo-top img { height: 110px; object-fit: contain; }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 48px 8px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header .label {
+      font-size: 1.3rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #00e5ff;
+      margin-bottom: 8px;
+    }
+
+    .header .day-name {
+      font-size: 5.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .header .date {
+      font-size: 1.8rem;
+      color: #a0b8d0;
+      margin-top: 8px;
+    }
+
+    .week-badge {
+      display: inline-block;
+      background: #2233ee;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 20px;
+      border-radius: 20px;
+      margin-top: 14px;
+    }
+
+    /* ── Cards ── */
+    .menu-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .top-row {
+      display: flex;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .card {
+      background: #162040;
+      border-radius: 18px;
+      padding: 36px 36px;
+      width: 420px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-top: 6px solid transparent;
+    }
+
+    .card.meat       { border-top-color: #2233ee; }
+    .card.chicken    { border-top-color: #00e5ff; }
+    .card.vegetarian { border-top-color: #4caf50; width: 868px; }
+
+    .card .option-label {
+      font-size: 1rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .card.meat       .option-label { color: #5577ff; }
+    .card.chicken    .option-label { color: #00e5ff; }
+    .card.vegetarian .option-label { color: #4caf50; }
+
+    .card .dish {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .card .sides {
+      font-size: 1.3rem;
+      color: #a0b8d0;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    /* ── CSG footer ── */
+    .logo-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 48px;
+      background: #ffffff;
+    }
+
+    .logo-bottom img { height: 36px; object-fit: contain; }
+
+    /* ── Weekend ── */
+    .weekend-msg { text-align: center; }
+    .weekend-msg h1 { font-size: 5rem; font-weight: 700; color: #ffffff; }
+    .weekend-msg p  { font-size: 1.8rem; color: #a0b8d0; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="logo-top">
+    <img src="Derivco Logo-Icon-Horizontal-01.jpg" alt="Derivco" />
+  </div>
+
+  <div class="main">
+    <div id="app"></div>
+  </div>
+
+  <div class="logo-bottom">
+    <img src="CSG - Logo.png" alt="CSG Foods" />
+  </div>
+
+  <script>
+    const DAY_NAMES   = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const DAY_DISPLAY = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const MONTHS      = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    function getWeekNumber(date) {
+      const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+      const start = new Date(ROTATION_START_DATE);
+      start.setHours(0, 0, 0, 0);
+      const diff = date - start;
+      if (diff < 0) return 1;
+      return (Math.floor(diff / msPerWeek) % 2 === 0) ? 1 : 2;
+    }
+
+    function card(cssClass, label, item) {
+      const sidesHtml = item.sides
+        ? `<div class="sides">${item.sides}</div>`
+        : '';
+      return `
+        <div class="card ${cssClass}">
+          <div class="option-label">${label}</div>
+          <div class="dish">${item.dish}</div>
+          ${sidesHtml}
+        </div>`;
+    }
+
+    function render() {
+      const now      = new Date();
+      const dayIndex = now.getDay();
+      const app      = document.getElementById('app');
+
+      if (dayIndex === 0 || dayIndex === 6) {
+        app.innerHTML = `
+          <div class="weekend-msg">
+            <h1>Enjoy your weekend!</h1>
+            <p>The menu returns on Monday.</p>
+          </div>`;
+        return;
+      }
+
+      const dayKey  = DAY_NAMES[dayIndex];
+      const weekNum = getWeekNumber(now);
+      const today   = MENUS[`week${weekNum}`][dayKey];
+
+      app.innerHTML = `
+        <div class="header">
+          <div class="label">Today's Menu</div>
+          <div class="day-name">${DAY_DISPLAY[dayIndex]}</div>
+          <div class="date">${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}</div>
+          <div class="week-badge">Week ${weekNum}</div>
+        </div>
+
+        <div class="menu-cards">
+          <div class="top-row">
+            ${card('meat',    'Option 1', today.option1)}
+            ${card('chicken', 'Option 2', today.option2)}
+          </div>
+          ${card('vegetarian', 'Vegetarian', today.vegetarian)}
+        </div>`;
+    }
+
+    render();
+    setInterval(render, 60000);
+  </script>
+</body>
+</html>
